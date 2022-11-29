@@ -24,10 +24,10 @@ const client = new MongoClient(uri, {
 // run function & api endpoint
 async function run() {
     try {
-        const usersCollection = client.db(recycleHub - db).collection("users");
+        const usersCollection = client.db("recycleHub-db").collection("users");
 
         // save the user in db & generate JWT
-        app.put("user/:email", async (req, res) => {
+        app.put("/user/:email", async (req, res) => {
             const email = req.params.email;
             const user = req.body;
             const filter = { email: email };
@@ -48,7 +48,44 @@ async function run() {
         });
 
 
-        
+        // set User role
+        app.patch("/userRole/:email", async (req, res) => {
+            const email = req.params.email;
+            const role = req.body;
+            const filter = { email: email };
+            
+            const options = { upsert: false };
+            const doc = {
+                $set: {"role": role.role},
+            };
+            const result = await usersCollection.updateOne(
+                filter,
+                doc,
+                options
+            );
+
+            res.send({ result });
+        });
+
+
+        // set User role
+        app.patch("/verifyStatus/:email", async (req, res) => {
+            const email = req.params.email;
+            const isVerified = req.body;
+            const filter = { email: email };
+            
+            const options = { upsert: false };
+            const doc = {
+                $set: {"isVerified": isVerified.isVerified},
+            };
+            const result = await usersCollection.updateOne(
+                filter,
+                doc,
+                options
+            );
+
+            res.send({ result });
+        });
     } finally {
     }
 }
