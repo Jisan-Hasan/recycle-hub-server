@@ -25,6 +25,7 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         const usersCollection = client.db("recycleHub-db").collection("users");
+        const categoriesCollection = client.db("recycleHub-db").collection("categories");
 
         // save the user in db & generate JWT
         app.put("/user/:email", async (req, res) => {
@@ -86,6 +87,15 @@ async function run() {
 
             res.send({ result });
         });
+
+
+
+        // get all category
+        app.get('/categories', async(req, res) => {
+            const filter = {};
+            const categories = await categoriesCollection.find(filter).toArray();
+            res.send(categories);
+        })
     } finally {
     }
 }
