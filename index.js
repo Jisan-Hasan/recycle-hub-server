@@ -31,6 +31,9 @@ async function run() {
         const productsCollection = client
             .db("recycleHub-db")
             .collection("products");
+        const bookingsCollection = client
+            .db("recycleHub-db")
+            .collection("bookings");
 
         // save the user in db & generate JWT
         app.put("/user/:email", async (req, res) => {
@@ -120,16 +123,39 @@ async function run() {
         app.get("/myProducts/:email", async (req, res) => {
             const email = req.params.email;
             // console.log(email);
-            const filter = {sellerEmail: email};
+            const filter = { sellerEmail: email };
             const result = await productsCollection.find(filter).toArray();
             res.send(result);
         });
 
         // get all seller or buyer user form db
-        app.get('/allUser/:role', async(req, res) => {
+        app.get("/allUser/:role", async (req, res) => {
             const role = req.params.role;
-            const filter = {role: role};
+            const filter = { role: role };
             const result = await usersCollection.find(filter).toArray();
+            res.send(result);
+        });
+
+        // delete user endpoint
+        app.delete("/deleteUser/:email", async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const result = await usersCollection.deleteOne(filter);
+            res.send(result);
+        });
+
+        // get products by their category
+        app.get("/products/:category", async (req, res) => {
+            const category = req.params.category;
+            const filter = { category: category };
+            const result = await productsCollection.find(filter).toArray();
+            res.send(result);
+        });
+
+        // save booking collection to db
+        app.post('/bookings', async(req, res) => {
+            const booking = req.body;
+            const result = await bookingsCollection.insertOne(booking);
             res.send(result);
         })
     } finally {
