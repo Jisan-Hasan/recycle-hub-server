@@ -1,4 +1,4 @@
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const express = require("express");
 const cors = require("cors");
 const jwt = require("jsonwebtoken");
@@ -75,7 +75,7 @@ async function run() {
             res.send({ result });
         });
 
-        // set User role
+        // set User verify status
         app.patch("/verifyStatus/:email", async (req, res) => {
             const email = req.params.email;
             const isVerified = req.body;
@@ -153,11 +153,42 @@ async function run() {
         });
 
         // save booking collection to db
-        app.post('/bookings', async(req, res) => {
+        app.post("/bookings", async (req, res) => {
             const booking = req.body;
             const result = await bookingsCollection.insertOne(booking);
             res.send(result);
-        })
+        });
+
+        // get bookings for particular buyer
+        app.get("/bookings/:email", async (req, res) => {
+            const email = req.params.email;
+            const filter = { buyerEmail: email };
+            const result = await bookingsCollection.find(filter).toArray();
+            res.send(result);
+        });
+
+        // set advertise property to the product
+        app.patch("/products/:id", async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+            const options = { upsert: false };
+            const doc = {
+                $set: { isAdvertised: true },
+            };
+            const result = await productsCollection.updateOne(
+                filter,
+                doc,
+                options
+            );
+            res.send({ result });
+        });
+
+        // get all advertise item
+        app.get("/advertisedProduct", async (req, res) => {
+            const filter = { isAdvertised: true };
+            const result = await productsCollection.find(filter).toArray();
+            res.send(result);
+        });
     } finally {
     }
 }
