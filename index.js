@@ -25,7 +25,10 @@ const client = new MongoClient(uri, {
 async function run() {
     try {
         const usersCollection = client.db("recycleHub-db").collection("users");
-        const categoriesCollection = client.db("recycleHub-db").collection("categories");
+        const categoriesCollection = client
+        .db("recycleHub-db")
+        .collection("categories");
+        const productsCollection = client.db("recycleHub-db").collection("products");
 
         // save the user in db & generate JWT
         app.put("/user/:email", async (req, res) => {
@@ -48,16 +51,15 @@ async function run() {
             res.send({ result, token });
         });
 
-
         // set User role
         app.patch("/userRole/:email", async (req, res) => {
             const email = req.params.email;
             const role = req.body;
             const filter = { email: email };
-            
+
             const options = { upsert: false };
             const doc = {
-                $set: {"role": role.role},
+                $set: { role: role.role },
             };
             const result = await usersCollection.updateOne(
                 filter,
@@ -67,17 +69,16 @@ async function run() {
 
             res.send({ result });
         });
-
 
         // set User role
         app.patch("/verifyStatus/:email", async (req, res) => {
             const email = req.params.email;
             const isVerified = req.body;
             const filter = { email: email };
-            
+
             const options = { upsert: false };
             const doc = {
-                $set: {"isVerified": isVerified.isVerified},
+                $set: { isVerified: isVerified.isVerified },
             };
             const result = await usersCollection.updateOne(
                 filter,
@@ -88,13 +89,29 @@ async function run() {
             res.send({ result });
         });
 
-
-
         // get all category
-        app.get('/categories', async(req, res) => {
+        app.get("/categories", async (req, res) => {
             const filter = {};
-            const categories = await categoriesCollection.find(filter).toArray();
+            const categories = await categoriesCollection
+                .find(filter)
+                .toArray();
             res.send(categories);
+        });
+
+        // get user role from db
+        app.get("/userRole/:email", async (req, res) => {
+            const email = req.params.email;
+            const filter = { email: email };
+            const user = await usersCollection.findOne(filter);
+            res.send(user);
+        });
+
+        // add product to the database
+        app.post('/addProduct', async(req, res) => {
+            const product = req.body;
+            // console.log(product);
+            const result = await productsCollection.insertOne(product);
+            res.send(result)
         })
     } finally {
     }
