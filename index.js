@@ -124,6 +124,14 @@ async function run() {
             const result = await productsCollection.find(filter).toArray();
             res.send(result);
         });
+
+        // get all seller or buyer user form db
+        app.get('/allUser/:role', async(req, res) => {
+            const role = req.params.role;
+            const filter = {role: role};
+            const result = await usersCollection.find(filter).toArray();
+            res.send(result);
+        })
     } finally {
     }
 }
