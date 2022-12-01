@@ -26,9 +26,11 @@ async function run() {
     try {
         const usersCollection = client.db("recycleHub-db").collection("users");
         const categoriesCollection = client
-        .db("recycleHub-db")
-        .collection("categories");
-        const productsCollection = client.db("recycleHub-db").collection("products");
+            .db("recycleHub-db")
+            .collection("categories");
+        const productsCollection = client
+            .db("recycleHub-db")
+            .collection("products");
 
         // save the user in db & generate JWT
         app.put("/user/:email", async (req, res) => {
@@ -107,12 +109,21 @@ async function run() {
         });
 
         // add product to the database
-        app.post('/addProduct', async(req, res) => {
+        app.post("/addProduct", async (req, res) => {
             const product = req.body;
             // console.log(product);
             const result = await productsCollection.insertOne(product);
-            res.send(result)
-        })
+            res.send(result);
+        });
+
+        // get all products form db for seller
+        app.get("/myProducts/:email", async (req, res) => {
+            const email = req.params.email;
+            // console.log(email);
+            const filter = {sellerEmail: email};
+            const result = await productsCollection.find(filter).toArray();
+            res.send(result);
+        });
     } finally {
     }
 }
